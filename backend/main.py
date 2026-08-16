@@ -1,5 +1,14 @@
 import os
+import warnings
 import logging
+
+# Suppress internal LangChain/LangGraph pending deprecation notices
+warnings.filterwarnings("ignore", category=UserWarning)
+try:
+    from langchain_core._api.deprecation import LangChainPendingDeprecationWarning
+    warnings.filterwarnings("ignore", category=LangChainPendingDeprecationWarning)
+except ImportError:
+    pass
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
