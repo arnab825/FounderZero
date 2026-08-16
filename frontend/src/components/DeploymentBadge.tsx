@@ -20,8 +20,23 @@ export const DeploymentBadge: React.FC<DeploymentBadgeProps> = ({ deployment }) 
 
   if (!deployment) return null;
 
+  const getResolvedUrl = () => {
+    if (!deployment?.live_url) return '#';
+    let url = deployment.live_url;
+    // If backend saved localhost preview url in production, convert to real Render base or open via blob/doc
+    if (url.includes('localhost:')) {
+      const renderBackend = import.meta.env.VITE_API_URL;
+      if (renderBackend && !renderBackend.includes('localhost')) {
+        url = url.replace(/http:\/\/localhost:\d+/, renderBackend.replace(/\/+$/, ''));
+      }
+    }
+    return url;
+  };
+
+  const resolvedUrl = getResolvedUrl();
+
   const copyUrl = () => {
-    navigator.clipboard.writeText(deployment.live_url);
+    navigator.clipboard.writeText(resolvedUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -68,7 +83,7 @@ export const DeploymentBadge: React.FC<DeploymentBadgeProps> = ({ deployment }) 
             </span>
             <span className="text-slate-600">•</span>
             <span className="text-xs text-slate-400 font-mono truncate max-w-[240px] sm:max-w-md">
-              {deployment.live_url}
+              {resolvedUrl}
             </span>
           </div>
         </div>
@@ -84,7 +99,7 @@ export const DeploymentBadge: React.FC<DeploymentBadgeProps> = ({ deployment }) 
         </button>
 
         <a
-          href={deployment.live_url}
+          href={resolvedUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition-all hover:scale-105"

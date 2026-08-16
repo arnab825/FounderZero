@@ -18,7 +18,10 @@ async def deploy_app(project_id: str, html_code: str, platform: str = "local_san
     with open(index_file, "w", encoding="utf-8") as f:
         f.write(html_code)
 
-    local_url = f"http://localhost:{settings.PORT}/preview/{project_id}/index.html"
+    # Determine public base URL for preview
+    base_url = settings.BACKEND_PUBLIC_URL or settings.RENDER_EXTERNAL_URL or f"http://localhost:{settings.PORT}"
+    base_url = base_url.rstrip("/")
+    local_url = f"{base_url}/preview/{project_id}/index.html"
 
     if platform == "vercel" and settings.VERCEL_TOKEN:
         try:

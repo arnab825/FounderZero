@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     PORT: int = 8000
     HOST: str = "0.0.0.0"
+    BACKEND_PUBLIC_URL: Optional[str] = None
+    RENDER_EXTERNAL_URL: Optional[str] = None  # Render sets this automatically on deployed services
     CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173"
 
     # AI Configuration
