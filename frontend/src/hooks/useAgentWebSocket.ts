@@ -43,11 +43,22 @@ export function useAgentWebSocket(projectId?: string | null) {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Use configured WS URL or current host
-    const wsBase = import.meta.env.VITE_WS_URL 
-      ? import.meta.env.VITE_WS_URL.replace('http', 'ws') 
-      : `${protocol}//${window.location.host}`;
+    // Cleanly normalize WebSocket URL
+    let wsBase = import.meta.env.VITE_WS_URL;
+    if (wsBase) {
+      wsBase = wsBase.trim().replace(/\/+$/, '');
+      if (wsBase.startsWith('https://')) {
+        wsBase = wsBase.replace('https://', 'wss://');
+      } else if (wsBase.startsWith('http://')) {
+        wsBase = wsBase.replace('http://', 'ws://');
+      } else if (!wsBase.startsWith('ws://') && !wsBase.startsWith('wss://')) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsBase = `${protocol}//${wsBase}`;
+      }
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsBase = `${protocol}//${window.location.host}`;
+    }
     
     const wsUrl = `${wsBase}/ws/agent/${projectId}`;
     console.log(`Connecting to agent telemetry WebSocket: ${wsUrl}`);
