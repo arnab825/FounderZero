@@ -16,22 +16,22 @@ def build_agent_graph():
     """Builds and compiles the LangGraph StateGraph for the Autonomous Co-Founder."""
     graph = StateGraph(AgentState)
 
-    # Register Nodes
-    graph.add_node("market_research", market_research_node)
-    graph.add_node("business_planner", business_planner_node)
-    graph.add_node("copywriter", copywriter_node)
-    graph.add_node("code_architect", code_architect_node)
-    graph.add_node("deployment", deployment_node)
+    # Register Nodes with unique node names (to prevent collision with state key names)
+    graph.add_node("node_market_research", market_research_node)
+    graph.add_node("node_business_planner", business_planner_node)
+    graph.add_node("node_copywriter", copywriter_node)
+    graph.add_node("node_code_architect", code_architect_node)
+    graph.add_node("node_deployment", deployment_node)
 
     # Set Entry Point
-    graph.set_entry_point("market_research")
+    graph.set_entry_point("node_market_research")
 
     # Define Workflow Edges
-    graph.add_edge("market_research", "business_planner")
-    graph.add_edge("business_planner", "copywriter")
-    graph.add_edge("copywriter", "code_architect")
-    graph.add_edge("code_architect", "deployment")
-    graph.add_edge("deployment", END)
+    graph.add_edge("node_market_research", "node_business_planner")
+    graph.add_edge("node_business_planner", "node_copywriter")
+    graph.add_edge("node_copywriter", "node_code_architect")
+    graph.add_edge("node_code_architect", "node_deployment")
+    graph.add_edge("node_deployment", END)
 
     return graph.compile()
 
