@@ -143,17 +143,26 @@ export const CodePreview: React.FC<CodePreviewProps> = ({ codeArchitect, deploym
             </button>
           )}
 
-          {deployment?.live_url && (
-            <a
-              href={deployment.live_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-semibold transition-all"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Live Site</span>
-            </a>
-          )}
+          {deployment?.live_url && (() => {
+            let targetUrl = deployment.live_url;
+            if (targetUrl.includes('localhost:')) {
+              const renderBackend = import.meta.env.VITE_API_URL;
+              if (renderBackend && !renderBackend.includes('localhost')) {
+                targetUrl = targetUrl.replace(/http:\/\/localhost:\d+/, renderBackend.replace(/\/+$/, ''));
+              }
+            }
+            return (
+              <a
+                href={targetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 text-xs font-semibold transition-all"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Live Site</span>
+              </a>
+            );
+          })()}
 
           <button
             onClick={copyCode}
