@@ -1,0 +1,35 @@
+{
+  "auth": {
+    "authorizedDomains": [
+      "localhost",
+      "founder-zero.firebaseapp.com",
+      "founder-zero.web.app"
+    ],
+    "providers": {
+      "anonymous": true,
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "FounderZero",
+        "supportEmail": "founder@founderzero.ai"
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "frontend/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
