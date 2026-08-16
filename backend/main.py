@@ -54,19 +54,34 @@ app.include_router(projects_router)
 app.include_router(ws_router)
 
 
+from datetime import datetime
+from fastapi.responses import JSONResponse, Response
+
+
 @app.get("/")
+@app.head("/")
 async def root():
-    return {
-        "status": "healthy",
-        "service": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "docs": "/docs"
-    }
+    """Root status endpoint with HEAD support for fast ping monitoring."""
+    return JSONResponse(
+        content={
+            "status": "healthy",
+            "service": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+            "docs": "/docs",
+            "timestamp": datetime.utcnow().isoformat() + "Z"
+        },
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+    )
 
 
 @app.get("/health")
+@app.head("/health")
 async def health_check():
-    return {"status": "ok"}
+    """Dedicated lightweight health check endpoint for UptimeRobot keep-alive."""
+    return JSONResponse(
+        content={"status": "ok", "uptime_check": "active", "timestamp": datetime.utcnow().isoformat() + "Z"},
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+    )
 
 
 if __name__ == "__main__":
