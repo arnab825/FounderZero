@@ -50,17 +50,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Sandboxed Generated Apps Preview Directory
+# Register API Routers
+app.include_router(auth_router)
+app.include_router(projects_router)
+app.include_router(ws_router)
+
+# Dynamic HTML Preview fallback route (in case Render ephemeral disk wiped the static file)
+from fastapi.responses import HTMLResponse
+from firebase import get_db
+
+@app.get("/preview/{project_id}/index.html", response_class=HTMLResponse)
+@app.get("/preview/{project_id}", response_class=HTMLResponse)
+async def serve_preview_html(project_id: str):
+    """Serves the generated landing page directly from memory/database or static sandbox."""
+    static_file = os.path.join(settings.STATIC_SANDBOX_DIR, project_id, "index.html")
+    if os.path.exists(static_file):
+        with open(static_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    
+    # Dynamic DB fallback
+    try:
+        db = get_db()
+        doc = db.collection("projects").document(project_id).get()
+        if doc.exists:
+            data = doc.to_dict()
+            code_arch = data.get("code_architect")
+            if code_arch and isinstance(code_arch, dict) and code_arch.get("html_code"):
+                return HTMLResponse(content=code_arch["html_code"])
+    except Exception as e:
+        logger.warning(f"Error fetching preview from DB: {e}")
+
+    return HTMLResponse(content="<h1>Preview Not Found</h1><p>The requested preview is unavailable or still generating.</p>", status_code=404)
+
+# Mount Sandboxed Generated Apps Preview Directory for assets
 app.mount(
     "/preview",
     StaticFiles(directory=settings.STATIC_SANDBOX_DIR, html=True),
     name="preview"
 )
-
-# Register API Routers
-app.include_router(auth_router)
-app.include_router(projects_router)
-app.include_router(ws_router)
 
 
 from datetime import datetime
